@@ -89,6 +89,17 @@ def fmt_arcmin(deg):
     return f"{arcmin}'{arcsec:04.1f}\""
 
 
+def fmt_dms(deg):
+    """Format decimal degrees to D°M'S.S\" string."""
+    sign = "-" if deg < 0 else ""
+    deg = abs(deg)
+    d = int(deg)
+    rem = (deg - d) * 60
+    m = int(rem)
+    s = (rem - m) * 60
+    return f"{sign}{d}°{m}'{s:.1f}\""
+
+
 # ============================================================
 # Aircraft data
 # ============================================================
@@ -296,6 +307,9 @@ for ac in AIRCRAFT:
 
     ge_fe_diff = fe_val - ge_val
 
+    err_band_line = Line2D([0], [0], color=TARGET_COLOR, linestyle="--",
+                           linewidth=TARGET_BAND_LINEWIDTH, alpha=0.7)
+
     legend_handles = [
         dummy,               # Aircraft name
         dummy,               # Star
@@ -304,7 +318,7 @@ for ac in AIRCRAFT:
         dummy,               # UTC offset
         dummy,               # Blank spacer
         inscribed_line,      # Inscribed angle line
-        dummy,               # Inscribed angle error band
+        err_band_line,       # Inscribed angle error band
         fe_errbar[0],        # FE prediction
         ge_errbar[0],        # GE prediction
         dummy,               # Blank spacer
@@ -318,11 +332,10 @@ for ac in AIRCRAFT:
         f"Occl. Date: {ac['date']}",
         f"UTC Offset: {ac['utc_offset']}",
         "",
-        (f"GE–FE diff (inscribed ∠): {ge_fe_diff:.3f}° "
-         f"({fmt_arcmin(ge_fe_diff)}), {drop_m:.0f} m"),
-        f"Measurement error: ±{err:.3f}° ({fmt_arcmin(err)}), ±{err_drop_m:.0f} m",
-        f"θFE elev: {fe_val:.4f}° ±{err:.3f}°",
-        f"θGE elev: {ge_val:.4f}° ±{err:.3f}°",
+        f"GE–FE diff (inscribed ∠): {fmt_dms(ge_fe_diff)}, {drop_m:.0f} m",
+        f"Measurement error: ±{fmt_dms(err)}, ±{err_drop_m:.0f} m",
+        f"θFE elev: {fmt_dms(fe_val)} ±{fmt_dms(err)}",
+        f"θGE elev: {fmt_dms(ge_val)} ±{fmt_dms(err)}",
         "",
         f"Error ÷ Drop: {ratio:.1f}×  (~{r['dist_km']:.0f} km)",
     ]
